@@ -8,17 +8,72 @@ import {
   Box,
   Badge,
   useColorModeValue,
+  useToast,
 } from '@chakra-ui/react';
 import { Trash2 } from 'lucide-react';
-import { useTaskContext } from '../context/TaskContext';
+import { Task, useTaskContext } from '../context/TaskContext';
 import { AnimatedContainer } from './animations/AnimatedContainer';
 import { TaskItemAnimation } from './animations/TaskItemAnimation';
 import { AnimatePresence } from 'framer-motion';
+import { TaskApiRepository } from '../infrastructure/repositories/task-repository';
+import { TaskService } from '../application/task.service';
 
 export const TaskList: React.FC = () => {
   const { state, dispatch } = useTaskContext();
   const bgColor = useColorModeValue('white', 'gray.700');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const toast = useToast();
+    const taskRepository = new TaskApiRepository();
+    const taskService = new TaskService(taskRepository);
+
+  const handleCheck = (task: Task) => async () => {
+    try {
+      dispatch({ type: 'TOGGLE_TASK', payload: task.id });
+      await taskService.updateTask(task.id, { completed: !task.completed });
+      if (task.completed) {
+        toast({
+          title: 'Task completed',
+          description: 'Congratulations on completing a task!',
+          status: 'success',
+          duration: 2000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      console.error('Error updating task:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update task',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+
+  }
+
+  const handleDelete = (task: Task) => async () => {
+    try {
+      await taskService.deleteTask(task.id);
+      dispatch({ type: 'DELETE_TASK', payload: task.id });
+      toast({
+        title: 'Task deleted',
+        description: 'The task has been deleted',
+        status: 'success',
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete task',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  }
 
   return (
     <AnimatedContainer>
@@ -46,9 +101,7 @@ export const TaskList: React.FC = () => {
                       <HStack spacing={2}>
                         <Checkbox
                           isChecked={task.completed}
-                          onChange={() =>
-                            dispatch({ type: 'TOGGLE_TASK', payload: task.id })
-                          }
+                          onChange={handleCheck(task)}
                         >
                           <Text
                             fontSize="lg"
@@ -79,9 +132,7 @@ export const TaskList: React.FC = () => {
                       icon={<Trash2 size={18} />}
                       colorScheme="red"
                       variant="ghost"
-                      onClick={() =>
-                        dispatch({ type: 'DELETE_TASK', payload: task.id })
-                      }
+                      onClick={handleDelete(task)}
                     />
                   </HStack>
                 </Box>

@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useReducer } from 'react';
 
-interface Task {
+export interface Task {
   id: string;
   title: string;
   description: string;
+  userId: string;
   completed: boolean;
   createdAt: Date;
 }
@@ -16,7 +17,9 @@ type TaskAction =
   | { type: 'ADD_TASK'; payload: Task }
   | { type: 'UPDATE_TASK'; payload: Task }
   | { type: 'DELETE_TASK'; payload: string }
-  | { type: 'TOGGLE_TASK'; payload: string };
+  | { type: 'TOGGLE_TASK'; payload: string }
+  | { type: 'SET_TASKS'; payload: Task[] };
+
 
 const TaskContext = createContext<{
   state: TaskState;
@@ -25,6 +28,11 @@ const TaskContext = createContext<{
 
 const taskReducer = (state: TaskState, action: TaskAction): TaskState => {
   switch (action.type) {
+    case 'SET_TASKS':
+      return {
+        ...state,
+        tasks: action.payload,
+      };
     case 'ADD_TASK':
       return {
         ...state,

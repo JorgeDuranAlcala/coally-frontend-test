@@ -1,46 +1,38 @@
 import React from 'react';
 import {
   ChakraProvider,
-  Container,
-  VStack,
-  Heading,
-  Text,
-  useColorModeValue,
-  Box,
 } from '@chakra-ui/react';
+
+
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { PrivateRoute } from './routes/PrivateRoute';
+import { PublicRoute } from './routes/PublicRoute';
 import { TaskProvider } from './context/TaskContext';
-import { TaskForm } from './components/TaskForm';
-import { TaskList } from './components/TaskList';
-import { CheckCircle } from 'lucide-react';
+import { Main } from './pages/main';
+import { Login } from './pages/Login';
+import { Register } from './pages/Register';
 
-function App() {
-  const bgColor = useColorModeValue('gray.50', 'gray.900');
-
+export const App = () => {
   return (
     <ChakraProvider>
       <TaskProvider>
-        <Box minH="100vh" bg={bgColor} py={10}>
-          <Container maxW="container.md">
-            <VStack spacing={8}>
-              <VStack spacing={2} textAlign="center">
-                <CheckCircle size={40} color="#4299E1" />
-                <Heading size="xl">Task Manager</Heading>
-                <Text color="gray.600">
-                  Organize your tasks efficiently and stay productive
-                </Text>
-              </VStack>
-              <Box w="100%" bg="white" p={6} borderRadius="lg" shadow="md">
-                <TaskForm />
-              </Box>
-              <Box w="100%">
-                <TaskList />
-              </Box>
-            </VStack>
-          </Container>
-        </Box>
+        <BrowserRouter>
+          <Routes>
+            {/* Public Routes */}
+            <Route element={<PublicRoute />}>
+              <Route path="/login" element={<Login/>} />
+              <Route path="/register" element={<Register/>} />
+            </Route>
+
+            {/* Private Routes */}
+            <Route element={<PrivateRoute />}>
+              <Route path="/" element={
+               <Main />
+              } />
+            </Route>
+          </Routes>
+        </BrowserRouter>
       </TaskProvider>
     </ChakraProvider>
   );
-}
-
-export default App;
+};

@@ -11,14 +11,19 @@ import {
 import { motion } from 'framer-motion';
 import { useTaskContext } from '../context/TaskContext';
 import { AnimatedContainer } from './animations/AnimatedContainer';
+import { TaskApiRepository } from '../infrastructure/repositories/task-repository';
+import { TaskService } from '../application/task.service';
 
 export const TaskForm: React.FC = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const { dispatch } = useTaskContext();
   const toast = useToast();
+  const taskRepository = new TaskApiRepository();
+  const taskService = new TaskService(taskRepository);
+  const userId = localStorage.getItem('userId');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
       toast({
@@ -31,14 +36,13 @@ export const TaskForm: React.FC = () => {
       return;
     }
 
-    const newTask = {
-      id: Date.now().toString(),
+    const newTask = await taskService.createTask({
       title,
       description,
       completed: false,
-      createdAt: new Date(),
-    };
-
+      userId: String(userId),
+    });
+    console.log(newTask);
     dispatch({ type: 'ADD_TASK', payload: newTask });
     setTitle('');
     setDescription('');
