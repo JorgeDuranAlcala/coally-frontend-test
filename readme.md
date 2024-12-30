@@ -38,7 +38,7 @@ npm install
 
 3. create a .env file in the root directory and add the following:
 ```bash	
- VITE_API_URL=http://localhost:3000
+ VITE_BACK_URL=http://localhost:3000
 ```
 
 4. Start the development server:
